@@ -32,10 +32,10 @@
 #   unit   - 单位类型 (px=像素)
 #
 # 形状字段说明：
-#   ID  - 唯一标识符
+#   #N  - 序号标识符 (N=1,2,3...)
 #   T   - 类型: rect=矩形 circle=圆形 line=线条 text=文本
 #   R   - 矩形区域: x,y,width,height (像素值)
-#   Z   - 层级: 数字越大越在上层
+#   Z   - 层级: 必须为纯数字（0,1,2...），禁止包含字母，数字越大越在上层
 #   TXT - 文本内容 (仅 text 类型)
 #
 # AI 使用建议：
@@ -47,10 +47,10 @@
 
 META:canvas=900x600 | base=375x667 | unit=px
 
-ID:s1 | T:rect | R:100,200,120,40 | Z:1
-ID:s2 | T:circle | R:300,220,20,20 | Z:1
-ID:s3 | T:text | R:80,100,200,30 | Z:2 | TXT:Title
-ID:s4 | T:line | R:0,150,400,2 | Z:0
+#1 | T:rect | R:100,200,120,40 | Z:1
+#2 | T:circle | R:300,220,20,20 | Z:1
+#3 | T:text | R:80,100,200,30 | Z:2 | TXT:Title
+#4 | T:line | R:0,150,400,2 | Z:0
 ```
 
 ### 2.2 格式说明
@@ -89,17 +89,17 @@ META:canvas={width}x{height} | base={baseWidth}x{baseHeight} | unit=px
 每行一个形状，格式：
 
 ```
-ID:{id} | T:{type} | R:{x},{y},{w},{h} | Z:{z-index} [| TXT:{text}]
+#{n} | T:{type} | R:{x},{y},{w},{h} | Z:{z-index} [| TXT:{text}]
 ```
 
 **字段说明**：
 
 | 字段 | 必需 | 说明 |
 |------|------|------|
-| ID | 是 | 唯一标识符 |
+| #N | 是 | 序号标识符 (N=1,2,3...)，用于标识和引用形状 |
 | T | 是 | 形状类型：rect/circle/line/text |
 | R | 是 | 矩形区域 x,y,width,height（像素） |
-| Z | 是 | 层级，数字越大越在上层，使用纯数字 |
+| Z | 是 | 层级，**强制要求纯数字**（如 0, 1, 2...），禁止包含任何字母，数字越大越在上层 |
 | TXT | 否 | 文本内容（仅 text 类型） |
 
 **形状类型**：
