@@ -44,3 +44,16 @@ coverage/
 *.tmp
 *.temp
 .cache/
+
+# Tauri specific
+*.app
+*.exe
+*.msi
+*.dmg
+*.deb
+*.rpm
+*.AppImage
+*.snap
+
+# Rust specific
+Cargo.lock
