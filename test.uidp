@@ -1,0 +1,60 @@
+# ═══════════════════════════════════════════════════════════
+# UIDP PROTOCOL v5.0 - 界面几何数据格式
+# ═══════════════════════════════════════════════════════════
+#
+# 本文件包含界面草图的几何数据，每行一个形状。
+#
+# 字段说明：
+#   ID  - 唯一标识符
+#   T   - 类型: rect=矩形 circle=圆形 line=线条 text=文本
+#   R   - 矩形区域: x,y,width,height (像素值)
+#   Z   - 层级: 数字越大越在上层
+#   TXT - 文本内容 (仅 text 类型)
+#
+# AI 使用建议：
+# - 根据形状位置和层级推断界面结构
+# - 根据形状类型选择合适的组件实现
+# - 根据相对位置推断布局关系
+# ═══════════════════════════════════════════════════════════
+
+# ===== 登录界面示例 =====
+ID:login_bg | T:rect | R:50,50,300,400 | Z:0
+ID:login_title | T:text | R:100,80,200,40 | Z:2 | TXT:User Login
+ID:username_label | T:text | R:70,150,80,30 | Z:2 | TXT:Username
+ID:username_input | T:rect | R:160,150,170,35 | Z:1
+ID:password_label | T:text | R:70,200,80,30 | Z:2 | TXT:Password
+ID:password_input | T:rect | R:160,200,170,35 | Z:1
+ID:login_btn | T:rect | R:100,280,200,45 | Z:1
+ID:login_btn_text | T:text | R:170,290,60,25 | Z:3 | TXT:Login
+ID:divider | T:line | R:70,350,260,2 | Z:1
+ID:register_link | T:text | R:130,370,140,25 | Z:2 | TXT:No account? Register
+
+# ===== 导航栏示例 =====
+ID:nav_bg | T:rect | R:400,50,500,60 | Z:0
+ID:nav_logo | T:circle | R:420,65,30,30 | Z:1
+ID:nav_home | T:text | R:480,70,60,30 | Z:2 | TXT:Home
+ID:nav_products | T:text | R:560,70,60,30 | Z:2 | TXT:Products
+ID:nav_about | T:text | R:640,70,60,30 | Z:2 | TXT:About
+ID:nav_contact | T:text | R:720,70,60,30 | Z:2 | TXT:Contact
+ID:nav_search | T:rect | R:820,65,60,30 | Z:1
+
+# ===== 卡片列表示例 =====
+ID:card1_bg | T:rect | R:400,150,220,180 | Z:0
+ID:card1_img | T:rect | R:420,170,180,100 | Z:1
+ID:card1_title | T:text | R:420,285,180,25 | Z:2 | TXT:Product Title A
+ID:card1_desc | T:text | R:420,315,180,20 | Z:2 | TXT:Product description...
+
+ID:card2_bg | T:rect | R:640,150,220,180 | Z:0
+ID:card2_img | T:rect | R:660,170,180,100 | Z:1
+ID:card2_title | T:text | R:660,285,180,25 | Z:2 | TXT:Product Title B
+ID:card2_desc | T:text | R:660,315,180,20 | Z:2 | TXT:Product description...
+
+ID:card3_bg | T:rect | R:400,350,220,180 | Z:0
+ID:card3_img | T:rect | R:420,370,180,100 | Z:1
+ID:card3_title | T:text | R:420,485,180,25 | Z:2 | TXT:Product Title C
+ID:card3_desc | T:text | R:420,515,180,20 | Z:2 | TXT:Product description...
+
+ID:card4_bg | T:rect | R:640,350,220,180 | Z:0
+ID:card4_img | T:rect | R:660,370,180,100 | Z:1
+ID:card4_title | T:text | R:660,485,180,25 | Z:2 | TXT:Product Title D
+ID:card4_desc | T:text | R:660,515,180,20 | Z:2 | TXT:Product description...

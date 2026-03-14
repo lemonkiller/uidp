@@ -1,0 +1,107 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f5f5f5;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+  height: 60px;
+  flex-shrink: 0;
+  min-height: 60px;
+}
+
+.app-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.export-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background-color: #4a90d9;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.export-btn:hover {
+  background-color: #3a7bc8;
+}
+
+.export-btn.secondary {
+  color: #4a90d9;
+  background-color: #f0f7ff;
+  border: 1px solid #4a90d9;
+}
+
+.export-btn.secondary:hover {
+  background-color: #e0efff;
+}
+
+.status-message {
+  font-size: 13px;
+  color: #666;
+  margin-left: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
+.excalidraw-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.excalidraw-wrapper > div {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.excalidraw-wrapper .excalidraw {
+  height: 100% !important;
+  width: 100% !important;
+}
