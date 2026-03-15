@@ -7,6 +7,9 @@
     "git:start": "node .tools/scripts/git-start.js",
     "git:finish": "node .tools/scripts/git-finish.js",
     "git:status": "git status",
-    "git:log": "git log --oneline --graph -20"
+    "git:log": "git log --oneline --graph -20",
+    "release": "node .tools/scripts/release.js",
+    "release:minor": "node .tools/scripts/release.js minor",
+    "release:major": "node .tools/scripts/release.js major"
   }
 }
