@@ -1,0 +1,12 @@
+{
+  "name": "uidp",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "git:start": "node .tools/scripts/git-start.js",
+    "git:finish": "node .tools/scripts/git-finish.js",
+    "git:status": "git status",
+    "git:log": "git log --oneline --graph -20"
+  }
+}

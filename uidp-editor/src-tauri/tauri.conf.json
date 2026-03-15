@@ -14,11 +14,12 @@
       {
         "label": "main",
         "title": "UIDP Editor - 界面几何数据编辑器",
-        "width": 1200,
-        "height": 800,
-        "minWidth": 800,
-        "minHeight": 600,
-        "center": true
+        "width": 1400,
+        "height": 900,
+        "minWidth": 1000,
+        "minHeight": 700,
+        "center": true,
+        "visible": false
       }
     ],
     "security": {
