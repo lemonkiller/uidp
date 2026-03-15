@@ -1,9 +1,11 @@
-name: Release
+﻿name: Release
 
 on:
   push:
     tags:
       - 'v*'
+    branches:
+      - release
   workflow_dispatch:
 
 jobs:
@@ -35,7 +37,9 @@ jobs:
           cache-dependency-path: uidp-editor/package-lock.json
 
       - name: Install Rust
-        uses: dtolnay/rust-action@stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: Install dependencies (Ubuntu)
         if: matrix.platform == 'ubuntu-22.04'
