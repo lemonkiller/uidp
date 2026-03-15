@@ -21,6 +21,13 @@ export interface Translations {
   saveFailed: string;
   copiedToClipboard: string;
   copyFailed: string;
+  // Import
+  importUidp: string;
+  openFile: string;
+  fileNotFound: string;
+  readFailed: string;
+  importSuccess: string;
+  invalidFileFormat: string;
   // Element type names
   rectangle: string;
   ellipse: string;
@@ -116,6 +123,12 @@ export const translations: Record<Language, Translations> = {
     saveFailed: "保存失败:",
     copiedToClipboard: "已复制到剪贴板",
     copyFailed: "复制失败:",
+    importUidp: "导入 .uidp 文件",
+    openFile: "打开文件",
+    fileNotFound: "文件不存在",
+    readFailed: "读取失败:",
+    importSuccess: "导入成功",
+    invalidFileFormat: "文件格式无效",
     rectangle: "矩形",
     ellipse: "圆形/椭圆",
     line: "线条",
@@ -205,6 +218,12 @@ export const translations: Record<Language, Translations> = {
     saveFailed: "Save failed:",
     copiedToClipboard: "Copied to clipboard",
     copyFailed: "Copy failed:",
+    importUidp: "Import .uidp File",
+    openFile: "Open File",
+    fileNotFound: "File not found",
+    readFailed: "Read failed:",
+    importSuccess: "Import successful",
+    invalidFileFormat: "Invalid file format",
     rectangle: "Rectangle",
     ellipse: "Ellipse",
     line: "Line",

@@ -159,6 +159,17 @@ html, body {
   background-color: #e0efff;
 }
 
+.export-btn.import {
+  color: #fff;
+  background-color: #28a745;
+  border: 1px solid #28a745;
+}
+
+.export-btn.import:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
 .status-message {
   font-size: 13px;
   color: #666;

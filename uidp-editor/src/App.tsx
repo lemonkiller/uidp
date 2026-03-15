@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Excalidraw } from "@excalidraw/excalidraw";
-import { save } from "@tauri-apps/plugin-dialog";
-import { writeTextFile } from "@tauri-apps/plugin-fs";
+import { save, open } from "@tauri-apps/plugin-dialog";
+import { writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { translations, type Language, type Translations } from "./i18n";
 import "./App.css";
@@ -260,6 +260,66 @@ function App() {
     }
   }, [excalidrawAPI, getBaseDimensions, t]);
 
+  const handleImportFromFile = useCallback(async () => {
+    if (!excalidrawAPI) {
+      setExportStatus(t.editorNotInitialized);
+      return;
+    }
+
+    try {
+      const filePath = await open({
+        filters: [
+          {
+            name: "UIDP",
+            extensions: ["uidp"],
+          },
+        ],
+      });
+
+      if (!filePath) {
+        return;
+      }
+
+      const content = await readTextFile(filePath);
+      const result = parseUIDP(content);
+
+      if (!result) {
+        setExportStatus(t.invalidFileFormat);
+        return;
+      }
+
+      const elements = convertFromUIDP(result.shapes, result.meta);
+
+      excalidrawAPI.updateScene({
+        elements,
+      });
+
+      // 更新预设选择
+      if (result.meta.preset) {
+        const presetNames: Record<string, string> = {
+          mobile: t.mobile,
+          tablet: t.tablet,
+          "desktop-hd": t.desktopHD,
+          "desktop-fhd": t.desktopFHD,
+        };
+        if (presetNames[result.meta.preset]) {
+          setSelectedPreset(presetNames[result.meta.preset]);
+          setIsCustom(false);
+        } else if (result.meta.preset === "custom" && result.meta.presetSize) {
+          setIsCustom(true);
+          setSelectedPreset(t.custom);
+          const [width, height] = result.meta.presetSize.split("x");
+          setCustomWidth(width);
+          setCustomHeight(height);
+        }
+      }
+
+      setExportStatus(t.importSuccess);
+    } catch (error) {
+      setExportStatus(`${t.readFailed} ${error}`);
+    }
+  }, [excalidrawAPI, t]);
+
   // 获取选中元素的类型名称
   const getSelectedElementTypeName = useCallback((): string => {
     if (selectedElements.length === 0) return "";
@@ -337,6 +397,12 @@ function App() {
             className="export-btn secondary"
           >
             {t.copyToClipboard}
+          </button>
+          <button
+            onClick={handleImportFromFile}
+            className="export-btn import"
+          >
+            {t.openFile}
           </button>
           <button
             onClick={() => setShowHelp(true)}
@@ -853,6 +919,236 @@ function calculateCanvasSize(elements: any[]): { width: number; height: number }
     width: Math.round(maxX - minX),
     height: Math.round(maxY - minY),
   };
+}
+
+// 解析 UIDP 文件内容
+function parseUIDP(content: string): { meta: UIDPMeta; shapes: UIDPShape[] } | null {
+  const lines = content.split("\n").filter((line) => line.trim());
+  let meta: UIDPMeta = {};
+  const shapes: UIDPShape[] = [];
+
+  for (const line of lines) {
+    // 跳过注释行
+    if (line.startsWith("#") && !line.match(/^#\d+/)) {
+      continue;
+    }
+
+    // 解析 META 行
+    if (line.startsWith("META:")) {
+      const metaStr = line.substring(5);
+      const parts = metaStr.split(" | ");
+      for (const part of parts) {
+        const [key, value] = part.split("=");
+        if (key && value) {
+          meta[key.trim() as keyof UIDPMeta] = value.trim();
+        }
+      }
+      continue;
+    }
+
+    // 解析形状行 #N | T:type | R:x,y,w,h | Z:z [| TXT:text] [| C:component]
+    const shapeMatch = line.match(
+      /^#(\d+)\s*\|\s*T:(\w+)\s*\|\s*R:([\d,\-]+)\s*\|\s*Z:(\d+)(?:\s*\|\s*TXT:([^|]*))?(?:\s*\|\s*C:(\w+))?/
+    );
+
+    if (shapeMatch) {
+      const [, , type, rectStr, zIndexStr, text, component] = shapeMatch;
+      const rectParts = rectStr.split(",").map((n) => parseInt(n, 10));
+
+      if (rectParts.length >= 4) {
+        const shape: UIDPShape = {
+          id: `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          type: type as UIDPShape["type"],
+          x: rectParts[0],
+          y: rectParts[1],
+          width: rectParts[2],
+          height: rectParts[3],
+          zIndex: parseInt(zIndexStr, 10),
+        };
+
+        if (text) {
+          shape.text = text.trim();
+        }
+
+        if (component && isValidComponentType(component)) {
+          shape.component = component as UIDPComponentType;
+        }
+
+        if (type === "artboard") {
+          shape.preset = meta.preset || "custom";
+        }
+
+        shapes.push(shape);
+      }
+    }
+  }
+
+  if (shapes.length === 0) {
+    return null;
+  }
+
+  return { meta, shapes };
+}
+
+// 验证组件类型
+function isValidComponentType(type: string): boolean {
+  const validTypes: UIDPComponentType[] = [
+    "button",
+    "input",
+    "select",
+    "checkbox",
+    "radio",
+    "textarea",
+    "switch",
+    "label",
+    "image",
+    "container",
+  ];
+  return validTypes.includes(type as UIDPComponentType);
+}
+
+// 从 UIDP 转换为 Excalidraw 元素
+function convertFromUIDP(shapes: UIDPShape[], meta: UIDPMeta): any[] {
+  const elements: any[] = [];
+
+  // 找到画板
+  const artboard = shapes.find((s) => s.type === "artboard");
+  const artboardX = artboard ? artboard.x : 0;
+  const artboardY = artboard ? artboard.y : 0;
+
+  // 先创建画板（Frame）
+  if (artboard) {
+    elements.push({
+      id: `frame-${Date.now()}`,
+      type: "frame",
+      x: artboardX,
+      y: artboardY,
+      width: artboard.width,
+      height: artboard.height,
+      customData: {
+        preset: artboard.preset || meta.preset,
+      },
+      backgroundColor: "transparent",
+      strokeColor: "#000000",
+      strokeWidth: 1,
+      strokeStyle: "solid",
+      roughness: 0,
+      opacity: 100,
+      locked: false,
+    });
+  }
+
+  // 转换其他形状
+  for (const shape of shapes) {
+    if (shape.type === "artboard") continue;
+
+    // 相对坐标转绝对坐标
+    const absoluteX = artboardX + shape.x;
+    const absoluteY = artboardY + shape.y;
+
+    let element: any;
+
+    switch (shape.type) {
+      case "rect":
+        element = {
+          id: shape.id,
+          type: "rectangle",
+          x: absoluteX,
+          y: absoluteY,
+          width: shape.width,
+          height: shape.height,
+          customData: shape.component ? { uidpComponent: shape.component } : undefined,
+          backgroundColor: "transparent",
+          strokeColor: "#000000",
+          strokeWidth: 1,
+          strokeStyle: "solid",
+          roughness: 1,
+          opacity: 100,
+          locked: false,
+        };
+        break;
+
+      case "circle":
+        element = {
+          id: shape.id,
+          type: "ellipse",
+          // 椭圆的中心点坐标
+          x: absoluteX + shape.width / 2,
+          y: absoluteY + shape.height / 2,
+          width: shape.width,
+          height: shape.height,
+          customData: shape.component ? { uidpComponent: shape.component } : undefined,
+          backgroundColor: "transparent",
+          strokeColor: "#000000",
+          strokeWidth: 1,
+          strokeStyle: "solid",
+          roughness: 1,
+          opacity: 100,
+          locked: false,
+        };
+        break;
+
+      case "line":
+        element = {
+          id: shape.id,
+          type: "line",
+          x: absoluteX,
+          y: absoluteY,
+          width: shape.width,
+          height: shape.height,
+          customData: shape.component ? { uidpComponent: shape.component } : undefined,
+          strokeColor: "#000000",
+          strokeWidth: 1,
+          strokeStyle: "solid",
+          roughness: 1,
+          opacity: 100,
+          locked: false,
+          points: [
+            [0, 0],
+            [shape.width, shape.height],
+          ],
+        };
+        break;
+
+      case "text":
+        element = {
+          id: shape.id,
+          type: "text",
+          x: absoluteX,
+          y: absoluteY,
+          width: shape.width,
+          height: shape.height,
+          text: shape.text || "",
+          customData: shape.component ? { uidpComponent: shape.component } : undefined,
+          strokeColor: "#000000",
+          fontSize: 20,
+          fontFamily: 1,
+          textAlign: "left",
+          verticalAlign: "top",
+          roughness: 0,
+          opacity: 100,
+          locked: false,
+        };
+        break;
+
+      default:
+        continue;
+    }
+
+    if (element) {
+      elements.push(element);
+    }
+  }
+
+  return elements;
+}
+
+// UIDP 元数据类型
+interface UIDPMeta {
+  canvas?: string;
+  unit?: string;
+  preset?: string;
+  presetSize?: string;
 }
 
 export default App;
