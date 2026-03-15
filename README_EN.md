@@ -75,6 +75,11 @@ npm run tauri build
 **Step 4: Export to AI**
 - Click "Export .uidp file" or "Copy to Clipboard"
 
+**Step 5: Import and Iterate (Optional)**
+- Click "Import .uidp file" to load previously exported files
+- Supports editing `.uidp` files and reloading them into the editor
+- Enables AI collaboration loop: Export → AI modifies → Import to view changes
+
 ### 3. Let AI Implement the Code
 
 Send the `.uidp` file content to AI, and it will generate interface code based on geometric data and component semantics.
@@ -191,6 +196,7 @@ Add semantic tags to shapes to help AI understand their purpose:
 | `V` | Select tool |
 | `Ctrl + Z` | Undo |
 | `Ctrl + Shift + Z` | Redo |
+| `Ctrl + C/V` | Copy/Paste |
 | `Delete` | Delete selected element |
 | `Space + Drag` | Pan canvas |
 | `Ctrl + +/-` | Zoom canvas |
@@ -230,6 +236,7 @@ META:canvas=2560x1440 | unit=px | preset=desktop-hd | presetSize=1280x720
 4. **Add text labels** - Use text tool to add descriptions
 5. **Tag key components** - Add semantic tags to buttons, inputs, etc.
 6. **Choose appropriate preset** - Select Mobile/Tablet/Desktop based on target device
+7. **Use import for iteration** - Export → AI modifies `.uidp` → Import to view changes
 
 ---
 

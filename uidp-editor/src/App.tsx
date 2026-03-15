@@ -1,35 +1,17 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Excalidraw } from "@excalidraw/excalidraw";
+import { Excalidraw, CaptureUpdateAction } from "@excalidraw/excalidraw";
 import { save, open } from "@tauri-apps/plugin-dialog";
 import { writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { translations, type Language, type Translations } from "./i18n";
+import {
+  convertToUIDP,
+  parseUIDP,
+  convertFromUIDP,
+  type UIDPComponentType,
+} from "./utils/uidp";
+import type { ExcalidrawAnyElement } from "./types/excalidraw";
 import "./App.css";
-
-type UIDPComponentType =
-  | "button"
-  | "input"
-  | "select"
-  | "checkbox"
-  | "radio"
-  | "textarea"
-  | "switch"
-  | "label"
-  | "image"
-  | "container";
-
-interface UIDPShape {
-  id: string;
-  type: "rect" | "circle" | "line" | "text" | "artboard";
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  zIndex: number;
-  text?: string;
-  component?: UIDPComponentType;
-  preset?: string;
-}
 
 interface DevicePreset {
   name: string;
@@ -63,6 +45,7 @@ function App() {
     { value: "container", label: t.container },
   ];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [excalidrawAPI, setExcalidrawAPI] = useState<any>(null);
   const [exportStatus, setExportStatus] = useState<string>("");
   const [selectedPreset, setSelectedPreset] = useState<string>(t.mobile);
@@ -72,7 +55,7 @@ function App() {
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
   // 组件属性面板状态
-  const [selectedElements, setSelectedElements] = useState<any[]>([]);
+  const [selectedElements, setSelectedElements] = useState<ExcalidrawAnyElement[]>([]);
   const [selectedComponentType, setSelectedComponentType] = useState<
     UIDPComponentType | ""
   >("")
@@ -119,18 +102,18 @@ function App() {
   );
 
   // 监听选中元素变化
-  const handleSelectionChange = useCallback((elements: any[]) => {
+  const handleSelectionChange = useCallback((elements: ExcalidrawAnyElement[]) => {
     const newElements = elements || [];
-    
+
     // 比较元素ID数组，避免不必要的更新
     const newIds = newElements.map(el => el.id).sort().join(',');
-    
+
     if (prevSelectedIdsRef.current !== newIds) {
       prevSelectedIdsRef.current = newIds;
       setSelectedElements(newElements);
       if (newElements.length === 1) {
         const el = newElements[0];
-        const componentType = el.customData?.uidpComponent || "";
+        const componentType = (el.customData?.uidpComponent as UIDPComponentType | undefined) || "";
         setSelectedComponentType(componentType);
       } else {
         setSelectedComponentType("");
@@ -157,7 +140,7 @@ function App() {
         excalidrawAPI.updateScene({
           elements: excalidrawAPI
             .getSceneElements()
-            .map((sceneEl: any) =>
+            .map((sceneEl: ExcalidrawAnyElement) =>
               sceneEl.id === el.id ? updatedElement : sceneEl
             ),
         });
@@ -183,7 +166,7 @@ function App() {
       excalidrawAPI.updateScene({
         elements: excalidrawAPI
           .getSceneElements()
-          .map((sceneEl: any) =>
+          .map((sceneEl: ExcalidrawAnyElement) =>
             sceneEl.id === el.id ? updatedElement : sceneEl
           ),
       });
@@ -290,9 +273,82 @@ function App() {
 
       const elements = convertFromUIDP(result.shapes, result.meta);
 
+      // 计算元素边界框，用于后续居中显示
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const el of elements) {
+        const elX = el.x as number | undefined;
+        const elY = el.y as number | undefined;
+        const elWidth = (el.width as number | undefined) || 0;
+        const elHeight = (el.height as number | undefined) || 0;
+        if (typeof elX === 'number' && typeof elY === 'number') {
+          minX = Math.min(minX, elX);
+          minY = Math.min(minY, elY);
+          maxX = Math.max(maxX, elX + elWidth);
+          maxY = Math.max(maxY, elY + elHeight);
+        }
+      }
+
+      console.log(`[UIDP Import] Bounds: min(${minX},${minY}) max(${maxX},${maxY})`);
+
+      // 获取画布容器尺寸以计算居中位置
+      const canvasContainer = document.querySelector('.excalidraw-wrapper');
+      const containerWidth = canvasContainer?.clientWidth || window.innerWidth;
+      const containerHeight = canvasContainer?.clientHeight || window.innerHeight;
+
+      // 计算元素中心点
+      const centerX = (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+
+      // 滚动到元素中心，使元素显示在画布中央
+      const newScrollX = elements.length > 0 ? containerWidth / 2 - centerX : 0;
+      const newScrollY = elements.length > 0 ? containerHeight / 2 - centerY : 0;
+
+      console.log(`[UIDP Import] Container size: ${containerWidth}x${containerHeight}`);
+      console.log(`[UIDP Import] Center: (${centerX}, ${centerY})`);
+      console.log(`[UIDP Import] Setting scroll to: (${newScrollX}, ${newScrollY})`);
+
+      // 只传递必要的 appState 属性，避免与 Excalidraw 内部状态冲突
+      // 使用新导入的元素替换现有元素（不合并）
+      
+      console.log(`[UIDP Import] Updating scene with ${elements.length} elements`);
+      console.log(`[UIDP Import] First few elements:`, elements.slice(0, 3).map((e) => ({
+        id: e.id,
+        type: e.type,
+        x: e.x,
+        y: e.y,
+        width: e.width,
+        height: e.height,
+      })));
+      
+      // 使用 updateScene 方法更新场景 - 替换所有元素
       excalidrawAPI.updateScene({
-        elements,
+        elements: elements as unknown[],
+        appState: {
+          scrollX: 0,
+          scrollY: 0,
+          zoom: { value: 1 },
+        },
+        captureUpdate: CaptureUpdateAction.NEVER,
       });
+
+      console.log(`[UIDP Import] Scene updated with ${elements.length} elements`);
+      
+      // 滚动到元素位置，使导入的内容可见
+      if (elements.length > 0) {
+        setTimeout(() => {
+          excalidrawAPI.scrollToContent(elements as unknown[]);
+          console.log(`[UIDP Import] Scrolled to content`);
+        }, 100);
+      }
+
+      // 延迟检查元素是否被正确添加
+      setTimeout(() => {
+        const sceneElements = excalidrawAPI.getSceneElements();
+        console.log(`[UIDP Import] Scene now has ${sceneElements.length} elements`);
+        if (sceneElements.length > 0) {
+          console.log(`[UIDP Import] First element:`, sceneElements[0]);
+        }
+      }, 200);
 
       // 更新预设选择
       if (result.meta.preset) {
@@ -485,6 +541,7 @@ function App() {
         <div className="excalidraw-wrapper">
           <Excalidraw
             key={lang}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             excalidrawAPI={(api: any) => {
               setExcalidrawAPI(api);
               // 监听选中变化 - 使用 ref 存储上一次状态避免重复渲染
@@ -499,7 +556,7 @@ function App() {
                   if (prevSelectedIdsState.current !== selectedIds) {
                     prevSelectedIdsState.current = selectedIds;
                     const elements = api.getSceneElements();
-                    const selected = elements.filter((el: any) =>
+                    const selected = elements.filter((el: ExcalidrawAnyElement) =>
                       Object.keys(appState.selectedElementIds).includes(el.id)
                     );
                     handleSelectionChange(selected);
@@ -682,473 +739,6 @@ function HelpModal({ t, onClose }: HelpModalProps) {
       </div>
     </div>
   );
-}
-
-function convertToUIDP(
-  elements: any[],
-  presetName: string,
-  presetWidth: number,
-  presetHeight: number,
-  t: Translations
-): string {
-  const shapes: UIDPShape[] = [];
-  let artboard: UIDPShape | null = null;
-
-  // 第一遍：查找画板（Frame类型元素，最大的那个作为画板）
-  const frames: any[] = [];
-  for (const el of elements) {
-    if (el.isDeleted) continue;
-
-    // 将所有 Frame 视为候选画板
-    if (el.type === "frame") {
-      frames.push(el);
-    }
-  }
-
-  // 选择面积最大的 Frame 作为画板
-  if (frames.length > 0) {
-    frames.sort((a, b) => (b.width * b.height) - (a.width * a.height));
-    const selectedArtboard = frames[0];
-    artboard = {
-      id: selectedArtboard.id,
-      type: "artboard",
-      x: Math.round(selectedArtboard.x),
-      y: Math.round(selectedArtboard.y),
-      width: Math.round(selectedArtboard.width),
-      height: Math.round(selectedArtboard.height),
-      zIndex: 0,
-      preset: selectedArtboard.customData?.preset || presetName,
-    };
-  }
-
-  // 如果没有找到画板，使用预设创建一个
-  if (!artboard) {
-    artboard = {
-      id: "artboard-0",
-      type: "artboard",
-      x: 0,
-      y: 0,
-      width: presetWidth,
-      height: presetHeight,
-      zIndex: 0,
-      preset: presetName,
-    };
-  }
-
-  // 第二遍：处理其他形状，坐标相对于画板
-  // 使用数组索引作为层级（Excalidraw中元素顺序就是层级顺序）
-  let zIndexCounter = 1;
-  for (const el of elements) {
-    if (el.isDeleted) continue;
-
-    // 跳过画板本身（与上面找到的是同一个Frame）
-    if (el.type === "frame" && el.id === artboard?.id) {
-      continue;
-    }
-
-    let type: UIDPShape["type"];
-    switch (el.type) {
-      case "rectangle":
-      case "diamond":
-        type = "rect";
-        break;
-      case "ellipse":
-        type = "circle";
-        break;
-      case "line":
-      case "arrow":
-        type = "line";
-        break;
-      case "text":
-        type = "text";
-        break;
-      default:
-        continue;
-    }
-
-    // 获取元素的左上角坐标（处理不同元素类型的坐标系统）
-    let elX = el.x;
-    let elY = el.y;
-    
-    // Excalidraw中椭圆和菱形的x,y是中心点，需要转换为左上角
-    if (el.type === "ellipse" || el.type === "diamond") {
-      elX = el.x - el.width / 2;
-      elY = el.y - el.height / 2;
-    }
-    
-    // 坐标相对于画板
-    const relativeX = Math.round(elX - artboard.x);
-    const relativeY = Math.round(elY - artboard.y);
-
-    const shape: UIDPShape = {
-      id: el.id,
-      type,
-      x: relativeX,
-      y: relativeY,
-      width: Math.round(el.width),
-      height: Math.round(el.height),
-      zIndex: zIndexCounter++, // 使用递增的层级值
-    };
-
-    if (type === "text" && "text" in el) {
-      shape.text = el.text;
-    }
-
-    // 读取组件语义标记
-    if (el.customData?.uidpComponent) {
-      shape.component = el.customData.uidpComponent;
-    }
-
-    shapes.push(shape);
-  }
-
-  shapes.sort((a, b) => a.zIndex - b.zIndex);
-
-  const canvasSize = calculateCanvasSize(elements);
-
-  const metaLine = `META:canvas=${canvasSize.width}x${canvasSize.height} | unit=px | preset=${artboard.preset} | presetSize=${presetWidth}x${presetHeight}`;
-
-  const lines: string[] = [];
-
-  // 画板始终是第一行
-  lines.push(
-    `#0 | T:artboard | R:0,0,${artboard.width},${artboard.height} | Z:0 | PRESET:${artboard.preset}`
-  );
-
-  // 其他形状（坐标已相对于画板）
-  shapes.forEach((shape, index) => {
-    let line = `#${index + 1} | T:${shape.type} | R:${shape.x},${shape.y},${shape.width},${shape.height} | Z:${shape.zIndex}`;
-    if (shape.text) {
-      line += ` | TXT:${shape.text}`;
-    }
-    if (shape.component) {
-      line += ` | C:${shape.component}`;
-    }
-    lines.push(line);
-  });
-
-  return getProtocolHeader(t) + metaLine + "\n\n" + lines.join("\n");
-}
-
-function getProtocolHeader(t: Translations): string {
-  return `# ═══════════════════════════════════════════════════════════
-# UIDP PROTOCOL v5.3 - ${t.language === 'Language' ? 'Interface Geometry Data Format' : '界面几何数据格式'}
-# ═══════════════════════════════════════════════════════════
-#
-# ${t.language === 'Language' ? '[Important Notes]' : '【重要说明】'}
-# - ${t.artboardDesc1}
-# - ${t.artboardDesc3}
-# - ${t.language === 'Language' ? 'Artboard size represents the original resolution of the design draft' : '画板尺寸表示设计稿的原始分辨率，元素坐标在此坐标系内定义'}
-# - ${t.language === 'Language' ? 'Elements need to be scaled proportionally to actual window size when rendering' : '渲染时需要将画板内的元素按比例缩放到实际窗口大小'}
-#
-# ${t.language === 'Language' ? '[Coordinate System]' : '【坐标系统】'}
-# - ${t.language === 'Language' ? 'All coordinates use top-left origin (0,0)' : '所有坐标都是左上角原点 (0,0)'}
-# - X${t.language === 'Language' ? ' axis increases to the right, Y axis increases downward' : '轴向右递增，Y轴向下递增'}
-# - ${t.artboardDesc3}
-# - ${t.language === 'Language' ? 'Element coordinates = offset within artboard (automatically calculated as relative coordinates)' : '元素坐标 = 元素在画板内的偏移量（已自动计算为相对坐标）'}
-#
-# META ${t.language === 'Language' ? 'Field Description' : '字段说明'}：
-#   canvas     - ${t.language === 'Language' ? 'Actual canvas size (auto-calculated from element boundaries)' : '实际画布尺寸 (从元素边界自动计算)'}
-#   unit       - ${t.language === 'Language' ? 'Unit type (px=pixel)' : '单位类型 (px=像素)'}
-#   preset     - ${t.language === 'Language' ? 'Device preset type: mobile/tablet/desktop-hd/desktop-fhd/custom' : '设备预设类型: mobile/tablet/desktop-hd/desktop-fhd/custom'}
-#   presetSize - ${t.language === 'Language' ? 'Preset reference size (used to calculate scale ratio)' : '预设参考尺寸 (用于计算缩放比例)'}
-#
-# ${t.artboardDescription.replace('📐 ', '')}${t.language === 'Language' ? ' Field Description' : '字段说明'}：
-#   #0       - ${t.language === 'Language' ? 'Artboard index fixed at 0' : '画板序号固定为 0'}
-#   T        - ${t.language === 'Language' ? 'Type: artboard=artboard' : '类型: artboard=画板'}
-#   R        - ${t.language === 'Language' ? 'Rect area: x,y,width,height (pixel values, x,y fixed at 0,0)' : '矩形区域: x,y,width,height (像素值，x,y固定为0,0)'}
-#   Z        - ${t.artboardDesc4}
-#   PRESET   - ${t.language === 'Language' ? 'Preset type: mobile/tablet/desktop-hd/desktop-fhd/custom' : '预设类型: mobile/tablet/desktop-hd/desktop-fhd/custom'}
-#
-# ${t.language === 'Language' ? 'Shape Field Description' : '形状字段说明'}：
-#   #N  - ${t.language === 'Language' ? 'Index identifier (N=1,2,3...)' : '序号标识符 (N=1,2,3...)'}
-#   T   - ${t.language === 'Language' ? 'Type: rect=rectangle circle=circle line=line text=text' : '类型: rect=矩形 circle=圆形 line=线条 text=文本'}
-#   R   - ${t.language === 'Language' ? 'Rect area: x,y,width,height (pixel values, relative to artboard top-left)' : '矩形区域: x,y,width,height (像素值，相对于画板左上角)'}
-#   Z   - ${t.language === 'Language' ? 'Layer: must be pure numbers (1,2,3...), larger numbers are on top' : '层级: 必须为纯数字（1,2,3...），数字越大越在上层'}
-#   TXT - ${t.language === 'Language' ? 'Text content (text type only)' : '文本内容 (仅 text 类型)'}
-#   C   - ${t.language === 'Language' ? 'Component semantics (optional): button/input/select/checkbox/radio/textarea/switch/label/image/container' : '组件语义 (可选): button/input/select/checkbox/radio/textarea/switch/label/image/container'}
-#
-# ${t.language === 'Language' ? '[Rendering Formula - Proportional Scaling]' : '【渲染公式 - 等比缩放】'}
-#   ${t.language === 'Language' ? '[Required] Must use proportional scaling to maintain original aspect ratio' : '【强制】必须使用等比缩放，保持元素原始宽高比'}
-#   scale = min(${t.language === 'Language' ? 'actual window width' : '实际窗口宽度'} / ${t.language === 'Language' ? 'artboard width' : '画板宽度'}, ${t.language === 'Language' ? 'actual window height' : '实际窗口高度'} / ${t.language === 'Language' ? 'artboard height' : '画板高度'})
-#   ${t.language === 'Language' ? 'Actual X' : '实际X'} = ${t.language === 'Language' ? 'element relative X' : '元素相对X'} * scale
-#   ${t.language === 'Language' ? 'Actual Y' : '实际Y'} = ${t.language === 'Language' ? 'element relative Y' : '元素相对Y'} * scale
-#   ${t.language === 'Language' ? 'Actual Width' : '实际宽度'} = ${t.language === 'Language' ? 'element width' : '元素宽度'} * scale
-#   ${t.language === 'Language' ? 'Actual Height' : '实际高度'} = ${t.language === 'Language' ? 'element height' : '元素高度'} * scale
-#
-# AI ${t.language === 'Language' ? 'Usage Suggestions' : '使用建议'}：
-# - ${t.language === 'Language' ? 'Determine target device type based on artboard PRESET' : '根据画板 PRESET 确定目标设备类型'}
-# - ${t.language === 'Language' ? '[Required] Initial screen window size must use the base resolution specified by presetSize' : '【强制】初始屏幕窗口大小必须使用 presetSize 指定的基准分辨率'}
-# - ${t.language === 'Language' ? 'Use the above rendering formula to convert relative coordinates to actual pixel positions' : '使用上述渲染公式将相对坐标转换为实际像素位置'}
-# - ${t.language === 'Language' ? 'Choose appropriate component implementation based on shape type' : '根据形状类型选择合适的组件实现'}
-# - ${t.language === 'Language' ? 'Determine component semantics based on C field (if present)' : '根据 C 字段（如有）确定组件语义'}
-# ═══════════════════════════════════════════════════════════
-
-`;
-}
-
-function calculateCanvasSize(elements: any[]): { width: number; height: number } {
-  if (elements.length === 0) {
-    return { width: 0, height: 0 };
-  }
-
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-
-  for (const el of elements) {
-    if (el.isDeleted) continue;
-
-    const x = el.x;
-    const y = el.y;
-    const width = el.width || 0;
-    const height = el.height || 0;
-
-    minX = Math.min(minX, x);
-    minY = Math.min(minY, y);
-    maxX = Math.max(maxX, x + width);
-    maxY = Math.max(maxY, y + height);
-  }
-
-  if (minX === Infinity) {
-    return { width: 0, height: 0 };
-  }
-
-  return {
-    width: Math.round(maxX - minX),
-    height: Math.round(maxY - minY),
-  };
-}
-
-// 解析 UIDP 文件内容
-function parseUIDP(content: string): { meta: UIDPMeta; shapes: UIDPShape[] } | null {
-  const lines = content.split("\n").filter((line) => line.trim());
-  let meta: UIDPMeta = {};
-  const shapes: UIDPShape[] = [];
-
-  for (const line of lines) {
-    // 跳过注释行
-    if (line.startsWith("#") && !line.match(/^#\d+/)) {
-      continue;
-    }
-
-    // 解析 META 行
-    if (line.startsWith("META:")) {
-      const metaStr = line.substring(5);
-      const parts = metaStr.split(" | ");
-      for (const part of parts) {
-        const [key, value] = part.split("=");
-        if (key && value) {
-          meta[key.trim() as keyof UIDPMeta] = value.trim();
-        }
-      }
-      continue;
-    }
-
-    // 解析形状行 #N | T:type | R:x,y,w,h | Z:z [| TXT:text] [| C:component]
-    const shapeMatch = line.match(
-      /^#(\d+)\s*\|\s*T:(\w+)\s*\|\s*R:([\d,\-]+)\s*\|\s*Z:(\d+)(?:\s*\|\s*TXT:([^|]*))?(?:\s*\|\s*C:(\w+))?/
-    );
-
-    if (shapeMatch) {
-      const [, , type, rectStr, zIndexStr, text, component] = shapeMatch;
-      const rectParts = rectStr.split(",").map((n) => parseInt(n, 10));
-
-      if (rectParts.length >= 4) {
-        const shape: UIDPShape = {
-          id: `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          type: type as UIDPShape["type"],
-          x: rectParts[0],
-          y: rectParts[1],
-          width: rectParts[2],
-          height: rectParts[3],
-          zIndex: parseInt(zIndexStr, 10),
-        };
-
-        if (text) {
-          shape.text = text.trim();
-        }
-
-        if (component && isValidComponentType(component)) {
-          shape.component = component as UIDPComponentType;
-        }
-
-        if (type === "artboard") {
-          shape.preset = meta.preset || "custom";
-        }
-
-        shapes.push(shape);
-      }
-    }
-  }
-
-  if (shapes.length === 0) {
-    return null;
-  }
-
-  return { meta, shapes };
-}
-
-// 验证组件类型
-function isValidComponentType(type: string): boolean {
-  const validTypes: UIDPComponentType[] = [
-    "button",
-    "input",
-    "select",
-    "checkbox",
-    "radio",
-    "textarea",
-    "switch",
-    "label",
-    "image",
-    "container",
-  ];
-  return validTypes.includes(type as UIDPComponentType);
-}
-
-// 从 UIDP 转换为 Excalidraw 元素
-function convertFromUIDP(shapes: UIDPShape[], meta: UIDPMeta): any[] {
-  const elements: any[] = [];
-
-  // 找到画板
-  const artboard = shapes.find((s) => s.type === "artboard");
-  const artboardX = artboard ? artboard.x : 0;
-  const artboardY = artboard ? artboard.y : 0;
-
-  // 先创建画板（Frame）
-  if (artboard) {
-    elements.push({
-      id: `frame-${Date.now()}`,
-      type: "frame",
-      x: artboardX,
-      y: artboardY,
-      width: artboard.width,
-      height: artboard.height,
-      customData: {
-        preset: artboard.preset || meta.preset,
-      },
-      backgroundColor: "transparent",
-      strokeColor: "#000000",
-      strokeWidth: 1,
-      strokeStyle: "solid",
-      roughness: 0,
-      opacity: 100,
-      locked: false,
-    });
-  }
-
-  // 转换其他形状
-  for (const shape of shapes) {
-    if (shape.type === "artboard") continue;
-
-    // 相对坐标转绝对坐标
-    const absoluteX = artboardX + shape.x;
-    const absoluteY = artboardY + shape.y;
-
-    let element: any;
-
-    switch (shape.type) {
-      case "rect":
-        element = {
-          id: shape.id,
-          type: "rectangle",
-          x: absoluteX,
-          y: absoluteY,
-          width: shape.width,
-          height: shape.height,
-          customData: shape.component ? { uidpComponent: shape.component } : undefined,
-          backgroundColor: "transparent",
-          strokeColor: "#000000",
-          strokeWidth: 1,
-          strokeStyle: "solid",
-          roughness: 1,
-          opacity: 100,
-          locked: false,
-        };
-        break;
-
-      case "circle":
-        element = {
-          id: shape.id,
-          type: "ellipse",
-          // 椭圆的中心点坐标
-          x: absoluteX + shape.width / 2,
-          y: absoluteY + shape.height / 2,
-          width: shape.width,
-          height: shape.height,
-          customData: shape.component ? { uidpComponent: shape.component } : undefined,
-          backgroundColor: "transparent",
-          strokeColor: "#000000",
-          strokeWidth: 1,
-          strokeStyle: "solid",
-          roughness: 1,
-          opacity: 100,
-          locked: false,
-        };
-        break;
-
-      case "line":
-        element = {
-          id: shape.id,
-          type: "line",
-          x: absoluteX,
-          y: absoluteY,
-          width: shape.width,
-          height: shape.height,
-          customData: shape.component ? { uidpComponent: shape.component } : undefined,
-          strokeColor: "#000000",
-          strokeWidth: 1,
-          strokeStyle: "solid",
-          roughness: 1,
-          opacity: 100,
-          locked: false,
-          points: [
-            [0, 0],
-            [shape.width, shape.height],
-          ],
-        };
-        break;
-
-      case "text":
-        element = {
-          id: shape.id,
-          type: "text",
-          x: absoluteX,
-          y: absoluteY,
-          width: shape.width,
-          height: shape.height,
-          text: shape.text || "",
-          customData: shape.component ? { uidpComponent: shape.component } : undefined,
-          strokeColor: "#000000",
-          fontSize: 20,
-          fontFamily: 1,
-          textAlign: "left",
-          verticalAlign: "top",
-          roughness: 0,
-          opacity: 100,
-          locked: false,
-        };
-        break;
-
-      default:
-        continue;
-    }
-
-    if (element) {
-      elements.push(element);
-    }
-  }
-
-  return elements;
-}
-
-// UIDP 元数据类型
-interface UIDPMeta {
-  canvas?: string;
-  unit?: string;
-  preset?: string;
-  presetSize?: string;
 }
 
 export default App;
