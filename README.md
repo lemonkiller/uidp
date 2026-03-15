@@ -2,6 +2,8 @@
 
 一个基于 Excalidraw 的界面草图编辑器，用于生成 UIDP (User Interface Data Packet) 格式的几何数据文件，辅助 AI 进行界面开发。
 
+**[中文](README.md) | [English](README_EN.md)**
+
 ## 功能特性
 
 - 🎨 **手绘风格画布** - 基于 Excalidraw 的直观绘图体验
@@ -155,7 +157,8 @@ uidp/
 ├── docs/
 │   └── product.md        # 产品设计文档
 ├── test.uidp             # 示例文件
-└── README.md             # 本文件
+├── README.md             # 本文件（中文版）
+└── README_EN.md          # 英文版
 ```
 
 ## 快捷键
