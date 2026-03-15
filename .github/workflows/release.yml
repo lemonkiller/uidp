@@ -35,7 +35,7 @@ jobs:
           cache-dependency-path: uidp-editor/package-lock.json
 
       - name: Install Rust
-        uses: dtolnay/rust-action@stable
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Install dependencies (Ubuntu)
         if: matrix.platform == 'ubuntu-22.04'
