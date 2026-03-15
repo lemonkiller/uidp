@@ -12,23 +12,35 @@ UIDP Editor is a visual sketching tool that lets you draw interface layouts thro
 
 ### Pain Points of Traditional Methods
 
-| Problem | Current Situation |
-|---------|-------------------|
+| Method | Problem |
+|--------|---------|
 | 📝 Text descriptions | Prone to ambiguity, back-and-forth communication |
 | 🎨 Design to code | Requires manual measurement and annotation |
 | 🔄 Repeated revisions | Every adjustment needs re-explanation |
 | 🤖 AI understanding difficulty | Natural language UI descriptions are inefficient |
+| 💰 **Design files too large** | Figma/Sketch files are several MB, wasting massive Tokens |
 
 ### UIDP's Solution
 
 ```
-Your Sketch → .uidp File → AI Understanding → Code Implementation
+Your Sketch → .uidp File (a few KB) → AI Understanding → Code Implementation
 ```
 
 - ✅ **Visual Drawing** - Drag and drop, no coding required
 - ✅ **Precise Communication** - Geometric data eliminates ambiguity
 - ✅ **Draw Once** - Export data directly to AI
 - ✅ **AI-Friendly** - Structured format, easy for AI to parse
+- 💰 **Extremely Token-Efficient** - Plain text format, **99%+ less** Token consumption than design images
+
+### Why Save More Tokens Than Design Images?
+
+| Method | File Size | Tokens per Request | Best For |
+|--------|-----------|-------------------|----------|
+| Figma/Sketch Screenshot | 500KB ~ 2MB | ~150K Tokens | High-fidelity visual reproduction |
+| PNG/JPG Prototype | 100KB ~ 500KB | ~30K Tokens | Simple prototypes |
+| **UIDP Data File** | **1KB ~ 5KB** | **~500 Tokens** | **Rapid development** |
+
+> 💡 A login page: Figma screenshot ~200KB, UIDP only 0.5KB, **saving 400x Tokens**
 
 ---
 
