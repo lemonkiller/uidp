@@ -1,125 +1,195 @@
 # UIDP Editor
 
-An Excalidraw-based UI sketch editor for generating UIDP (User Interface Data Packet) format geometric data files, designed to assist AI in interface development.
+**Collaborate with AI on UI Development through Sketches**
+
+UIDP Editor is a visual sketching tool that lets you draw interface layouts through simple drag-and-drop, generating structured data that AI can easily understand to help you implement the code.
 
 **[中文](README.md) | [English](README_EN.md)**
 
-## Features
+---
 
-- 🎨 **Hand-drawn Style Canvas** - Intuitive drawing experience based on Excalidraw
-- 📐 **Geometric Data Export** - Export sketches to structured `.uidp` format
-- 🏷️ **Component Semantic Tagging** - Tag shapes with component types (button, input, label, etc.)
-- 📱 **Device Presets** - Support for mobile, tablet, desktop, and other device sizes
-- 📏 **Custom Dimensions** - Support for custom canvas size input
-- 🌐 **Multi-language Support** - Switch between Chinese/English interface
-- 🤖 **AI-friendly** - Clean data format for easy AI understanding and processing
-- 💻 **Cross-platform** - Windows desktop application, lightweight and fast
+## What Problem Does It Solve?
 
-## Tech Stack
+### Pain Points of Traditional Methods
 
-- **Tauri v2** - Rust-powered desktop application framework
-- **React 19** - User interface
-- **TypeScript** - Type safety
-- **Excalidraw** - Core canvas component
+| Problem | Current Situation |
+|---------|-------------------|
+| 📝 Text descriptions | Prone to ambiguity, back-and-forth communication |
+| 🎨 Design to code | Requires manual measurement and annotation |
+| 🔄 Repeated revisions | Every adjustment needs re-explanation |
+| 🤖 AI understanding difficulty | Natural language UI descriptions are inefficient |
+
+### UIDP's Solution
+
+```
+Your Sketch → .uidp File → AI Understanding → Code Implementation
+```
+
+- ✅ **Visual Drawing** - Drag and drop, no coding required
+- ✅ **Precise Communication** - Geometric data eliminates ambiguity
+- ✅ **Draw Once** - Export data directly to AI
+- ✅ **AI-Friendly** - Structured format, easy for AI to parse
+
+---
 
 ## Quick Start
 
-### Requirements
+### 1. Download and Install
 
-- [Node.js](https://nodejs.org/) 18+
-- [Rust](https://rustup.rs/) (required for Tauri)
-- Windows 10/11
-
-### Install Dependencies
+Download the Windows installer from [Releases](../../releases), or build it yourself:
 
 ```bash
 cd uidp-editor
 npm install
-```
-
-### Development Mode
-
-```bash
-npm run tauri dev
-```
-
-### Build Release Version
-
-```bash
 npm run tauri build
 ```
 
-After building:
-- Executable: `src-tauri/target/release/uidp-editor.exe`
-- Installer: `src-tauri/target/release/bundle/`
+### 2. Draw Your First Interface
 
-## Usage Guide
+**Step 1: Create an Artboard**
+- Press `F` key or select the Frame tool
+- Drag to create a rectangle as the screen boundary
 
-### 1. Select Device Preset
+**Step 2: Draw Elements**
+- `R` - Rectangle (buttons, input fields)
+- `O` - Circle (avatars, icons)
+- `T` - Text (labels, titles)
+- `L` - Line (dividers)
 
-Choose target device preset in the top toolbar:
-- **Mobile**: 375×667 (iPhone SE/8)
-- **Tablet**: 768×1024 (iPad Portrait)
-- **Desktop HD**: 1280×720
-- **Desktop FHD**: 1920×1080
-- **Custom**: Manually input width and height
+**Step 3: Tag Components (Optional)**
+- Select a shape
+- Choose component type from the top toolbar (button, input, label, etc.)
 
-### 2. Draw Sketch
+**Step 4: Export to AI**
+- Click "Export .uidp file" or "Copy to Clipboard"
 
-Use Excalidraw tools to draw interfaces:
+### 3. Let AI Implement the Code
 
-| Shortcut | Tool | Purpose |
-|----------|------|---------|
-| R | Rectangle | Buttons, input boxes, cards |
-| O | Circle/Ellipse | Avatars, icons, radio buttons |
-| L | Line | Dividers, decorative lines |
-| T | Text | Labels, titles, descriptions |
-| F | Frame | **Artboard** - Define screen boundaries |
-| V | Select | Select and edit elements |
+Send the `.uidp` file content to AI, and it will generate interface code based on geometric data and component semantics.
 
-### 3. Tag Component Semantics
+---
 
-1. Select a shape
-2. Choose type from the "Component Type" dropdown in the top toolbar:
-   - `button` - Button
-   - `input` - Input field
-   - `select` - Dropdown select
-   - `checkbox` - Checkbox
-   - `radio` - Radio button
-   - `textarea` - Multi-line text
-   - `switch` - Toggle switch
-   - `label` - Label/Description text
-   - `image` - Image placeholder
-   - `container` - Container/Card
+## Usage Example
 
-### 4. Export Data
+### Example: Login Page
 
-- **Export File**: Click "Export .uidp file" to save locally
-- **Copy to Clipboard**: Click "Copy to Clipboard" to copy content directly
+**Sketch:**
+```
+┌─────────────────────────┐
+│      Login Page          │
+│                          │
+│    ┌───────────────┐     │
+│    │   Username    │     │
+│    └───────────────┘     │
+│                          │
+│    ┌───────────────┐     │
+│    │   Password    │     │
+│    └───────────────┘     │
+│                          │
+│    ┌───────────────┐     │  ← Tagged as button
+│    │     Login     │     │
+│    └───────────────┘     │
+│                          │
+└─────────────────────────┘
+```
 
-### 5. Switch Language
+**Exported Data:**
+```uidp
+META:canvas=800x600 | unit=px | preset=custom | presetSize=400x500
 
-Click the 🌐 button in the toolbar to switch between Chinese/English interface.
+#0 | T:artboard | R:0,0,400,500 | Z:0 | PRESET:custom
+#1 | T:text | R:150,30,100,30 | Z:2 | TXT:Login Page | C:label
+#2 | T:rect | R:50,80,300,40 | Z:1 | C:input
+#3 | T:text | R:60,90,80,20 | Z:2 | TXT:Username | C:label
+#4 | T:rect | R:50,140,300,40 | Z:1 | C:input
+#5 | T:text | R:60,150,80,20 | Z:2 | TXT:Password | C:label
+#6 | T:rect | R:50,220,300,45 | Z:1 | C:button
+#7 | T:text | R:180,235,40,20 | Z:2 | TXT:Login | C:label
+```
 
-## UIDP File Format (v5.3)
+**AI-Generated Code** (React example):
+```jsx
+export default function LoginPage() {
+  return (
+    <div className="w-full h-screen flex items-center justify-center">
+      <div className="w-[400px] p-8 border rounded-lg">
+        <h1 className="text-center text-xl mb-6">Login Page</h1>
+        <div className="mb-4">
+          <label className="block mb-1">Username</label>
+          <input className="w-full px-3 py-2 border rounded" />
+        </div>
+        <div className="mb-6">
+          <label className="block mb-1">Password</label>
+          <input type="password" className="w-full px-3 py-2 border rounded" />
+        </div>
+        <button className="w-full py-2 bg-blue-500 text-white rounded">
+          Login
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Core Concepts
+
+### Artboard
+
+The artboard defines screen boundaries. All element coordinates are relative offsets from the artboard's top-left corner.
+
+- Create with **Frame tool (F key)**
+- The largest Frame is automatically recognized as the artboard
+- Supports device presets: Mobile, Tablet, Desktop
+
+### Component Semantic Tags
+
+Add semantic tags to shapes to help AI understand their purpose:
+
+| Tag | Meaning | Usage |
+|-----|---------|-------|
+| `button` | Button | Clickable action |
+| `input` | Input field | Single-line text input |
+| `select` | Dropdown | Option selection |
+| `checkbox` | Checkbox | Multiple selection |
+| `radio` | Radio button | Single selection |
+| `textarea` | Multi-line text | Long text input |
+| `switch` | Toggle switch | State switching |
+| `label` | Label | Descriptive text |
+| `image` | Image | Image placeholder |
+| `container` | Container | Layout container |
+
+### Coordinate System
+
+- Relative coordinates: Element positions relative to artboard top-left
+- Proportional scaling: Scale to actual window size when rendering
+
+---
+
+## Shortcuts
+
+| Shortcut | Function |
+|----------|----------|
+| `R` | Rectangle tool |
+| `O` | Circle/Ellipse tool |
+| `L` | Line tool |
+| `T` | Text tool |
+| `F` | Frame tool (Artboard) |
+| `V` | Select tool |
+| `Ctrl + Z` | Undo |
+| `Ctrl + Shift + Z` | Redo |
+| `Delete` | Delete selected element |
+| `Space + Drag` | Pan canvas |
+| `Ctrl + +/-` | Zoom canvas |
+
+---
+
+## UIDP File Format
 
 `.uidp` is a minimalist UI geometric data format:
 
 ```uidp
-# ═══════════════════════════════════════════════════════════
-# UIDP PROTOCOL v5.3 - UI Geometric Data Format
-# ═══════════════════════════════════════════════════════════
-#
-# [Important Notes]
-# - All shape coordinates are relative offsets from the artboard top-left corner (relative coordinates)
-# - Rendering requires proportional scaling to convert relative coordinates to actual pixel positions
-#
-# [Rendering Formula]
-#   scale = min(actual window width / artboard width, actual window height / artboard height)
-#   actualX = element relative X * scale
-#   actualY = element relative Y * scale
-# ═══════════════════════════════════════════════════════════
-
 META:canvas=2560x1440 | unit=px | preset=desktop-hd | presetSize=1280x720
 
 #0 | T:artboard | R:0,0,1280,720 | Z:0 | PRESET:desktop-hd
@@ -128,72 +198,36 @@ META:canvas=2560x1440 | unit=px | preset=desktop-hd | presetSize=1280x720
 #3 | T:text | R:60,40,300,40 | Z:2 | TXT:Username | C:label
 ```
 
-### Format Description
+**Format Description:**
+- `META` - Canvas info and device preset
+- `#0` - Artboard (screen boundary reference)
+- `#N` - Shapes (type, position, layer, semantics)
+- `T` - Type (rect/circle/line/text/artboard)
+- `R` - Rectangle area (x,y,width,height)
+- `Z` - Layer (higher numbers are on top)
+- `TXT` - Text content
+- `C` - Component semantics (optional)
 
-- **META**: Canvas info, device preset, and reference dimensions
-- **#0**: Artboard (screen boundary reference)
-- **#N**: Shapes (type, position, layer, component semantics)
-- **T**: Type (rect/circle/line/text/artboard)
-- **R**: Rectangle area (x,y,width,height)
-- **Z**: Layer (higher numbers are on top)
-- **TXT**: Text content (text type only)
-- **C**: Component semantics (optional)
-
-## Project Structure
-
-```
-uidp/
-├── uidp-editor/          # Main application directory
-│   ├── src/              # React frontend code
-│   │   ├── App.tsx       # Main application component
-│   │   ├── App.css       # Styles
-│   │   ├── i18n.ts       # Internationalization config
-│   │   └── main.tsx      # Entry file
-│   ├── src-tauri/        # Tauri/Rust backend code
-│   │   ├── src/          # Rust source code
-│   │   └── tauri.conf.json  # Tauri configuration
-│   ├── package.json      # Project configuration
-│   └── ...
-├── docs/
-│   └── product.md        # Product design document
-├── test.uidp             # Sample file
-└── README.md             # This file (Chinese)
-└── README_EN.md          # English version
-```
-
-## Shortcuts
-
-| Shortcut | Function |
-|----------|----------|
-| R | Rectangle tool |
-| O | Circle/Ellipse tool |
-| L | Line tool |
-| T | Text tool |
-| F | Frame tool (Artboard) |
-| V | Select tool |
-| Ctrl + Z | Undo |
-| Ctrl + Shift + Z | Redo |
-| Ctrl + C/V | Copy/Paste |
-| Delete | Delete selected element |
-| Space + Drag | Pan canvas |
-| Ctrl + +/- | Zoom canvas |
-
-## Artboard Notes
-
-- Use **Frame tool (F key)** to create artboards
-- The largest Frame area is automatically recognized as the artboard
-- Artboard defines screen boundaries, all element coordinates are relative to artboard top-left corner
-- Artboard layer is fixed at Z:0, always at the bottom
+---
 
 ## Best Practices
 
-1. **Create artboard first**: Press F key to create Frame as artboard
-2. **Draw within artboard**: All elements should be placed inside the artboard
-3. **Use rectangles for components**: Buttons, input fields, cards, etc. use rectangles
-4. **Add text labels**: Use text tool to add labels and descriptions
-5. **Tag component semantics**: Add semantic tags to key components to help AI understand
-6. **Set correct preset**: Check if device preset matches target platform before exporting
-7. **Use custom dimensions**: Use custom size input when presets don't meet requirements
+1. **Create artboard first** - Press F key to create Frame as screen boundary
+2. **Draw within artboard** - All elements should be inside the artboard
+3. **Use rectangles for components** - Buttons, input fields use rectangles
+4. **Add text labels** - Use text tool to add descriptions
+5. **Tag key components** - Add semantic tags to buttons, inputs, etc.
+6. **Choose appropriate preset** - Select Mobile/Tablet/Desktop based on target device
+
+---
+
+## Tech Stack
+
+- **Tauri v2** - Lightweight desktop application framework
+- **React 19** - User interface
+- **Excalidraw** - Core canvas component
+
+---
 
 ## License
 
