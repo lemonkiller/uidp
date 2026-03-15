@@ -298,6 +298,20 @@ html, body {
   border-color: #c0c0c0;
 }
 
+/* 语言切换按钮样式 */
+.export-btn.language {
+  color: #666;
+  background-color: #f0f0f0;
+  border: 1px solid #d0d0d0;
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.export-btn.language:hover {
+  background-color: #e0e0e0;
+  border-color: #c0c0c0;
+}
+
 /* 帮助弹窗样式 */
 .help-modal-overlay {
   position: fixed;
