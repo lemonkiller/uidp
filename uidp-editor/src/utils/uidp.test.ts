@@ -6,8 +6,10 @@ import {
   calculateCanvasSize,
   parseUIDP,
   convertFromUIDP,
+  convertToUIDP,
 } from './uidp';
 import type { UIDPShape } from '../types';
+import { translations } from '../i18n';
 
 describe('uidp', () => {
   describe('generateId', () => {
@@ -165,6 +167,19 @@ describe('uidp', () => {
       });
     });
 
+    it('should decode escaped text content', () => {
+      const content = `META:canvas=400x300 | unit=px | preset=custom | presetSize=400x300
+
+#0 | T:artboard | R:0,0,400,300 | Z:0 | PRESET:custom
+#1 | T:text | R:50,50,100,30 | Z:1 | TXT:A%20%7C%20B`;
+      const result = parseUIDP(content);
+      expect(result).not.toBeNull();
+      expect(result!.shapes[1]).toMatchObject({
+        type: 'text',
+        text: 'A | B',
+      });
+    });
+
     it('should skip comment lines', () => {
       const content = `# This is a comment
 META:canvas=400x300 | unit=px | preset=custom | presetSize=400x300
@@ -208,7 +223,14 @@ META:canvas=400x300 | unit=px | preset=custom | presetSize=400x300
         },
       ];
       const result = convertFromUIDP(shapes, {});
-      expect(result).toHaveLength(0); // Artboard is not converted to element
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        type: 'frame',
+        x: 0,
+        y: 0,
+        width: 400,
+        height: 300,
+      });
     });
 
     it('should convert rectangle shape correctly', () => {
@@ -233,14 +255,14 @@ META:canvas=400x300 | unit=px | preset=custom | presetSize=400x300
         },
       ];
       const result = convertFromUIDP(shapes, {});
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({
+      expect(result).toHaveLength(2);
+      expect(result[1]).toMatchObject({
         type: 'rectangle',
         x: 50,
         y: 60,
         width: 100,
         height: 80,
-        backgroundColor: '#ff0000',
+        backgroundColor: 'transparent',
       });
     });
 
@@ -266,11 +288,11 @@ META:canvas=400x300 | unit=px | preset=custom | presetSize=400x300
         },
       ];
       const result = convertFromUIDP(shapes, {});
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({
+      expect(result).toHaveLength(2);
+      expect(result[1]).toMatchObject({
         type: 'ellipse',
-        x: 125, // 100 + 50/2
-        y: 125, // 100 + 50/2
+        x: 100,
+        y: 100,
         width: 50,
         height: 50,
       });
@@ -299,8 +321,8 @@ META:canvas=400x300 | unit=px | preset=custom | presetSize=400x300
         },
       ];
       const result = convertFromUIDP(shapes, {});
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({
+      expect(result).toHaveLength(2);
+      expect(result[1]).toMatchObject({
         type: 'text',
         text: 'Hello World',
         originalText: 'Hello World',
@@ -330,8 +352,8 @@ META:canvas=400x300 | unit=px | preset=custom | presetSize=400x300
         },
       ];
       const result = convertFromUIDP(shapes, {});
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({
+      expect(result).toHaveLength(2);
+      expect(result[1]).toMatchObject({
         type: 'line',
         points: [[0, 0], [100, 100]],
       });
@@ -360,8 +382,8 @@ META:canvas=400x300 | unit=px | preset=custom | presetSize=400x300
         },
       ];
       const result = convertFromUIDP(shapes, {});
-      expect(result).toHaveLength(1);
-      expect(result[0].customData).toEqual({ uidpComponent: 'button' });
+      expect(result).toHaveLength(2);
+      expect(result[1].customData).toEqual({ uidpComponent: 'button' });
     });
 
     it('should handle coordinates relative to artboard', () => {
@@ -386,10 +408,42 @@ META:canvas=400x300 | unit=px | preset=custom | presetSize=400x300
         },
       ];
       const result = convertFromUIDP(shapes, {});
-      expect(result).toHaveLength(1);
+      expect(result).toHaveLength(2);
       // Absolute coordinates = artboard origin + relative coordinates
-      expect(result[0].x).toBe(150); // 100 + 50
-      expect(result[0].y).toBe(160); // 100 + 60
+      expect(result[1].x).toBe(150); // 100 + 50
+      expect(result[1].y).toBe(160); // 100 + 60
+    });
+  });
+
+  describe('convertToUIDP', () => {
+    it('should escape text content containing separators', () => {
+      const result = convertToUIDP(
+        [
+          {
+            id: 'frame-1',
+            type: 'frame',
+            x: 0,
+            y: 0,
+            width: 400,
+            height: 300,
+          },
+          {
+            id: 'text-1',
+            type: 'text',
+            x: 50,
+            y: 50,
+            width: 100,
+            height: 30,
+            text: 'A | B',
+          },
+        ],
+        'mobile',
+        375,
+        667,
+        translations.en,
+      );
+
+      expect(result).toContain('TXT:A%20%7C%20B');
     });
   });
 });

@@ -21,14 +21,12 @@ export interface Translations {
   saveFailed: string;
   copiedToClipboard: string;
   copyFailed: string;
-  // Import
   importUidp: string;
   openFile: string;
   fileNotFound: string;
   readFailed: string;
   importSuccess: string;
   invalidFileFormat: string;
-  // Element type names
   rectangle: string;
   ellipse: string;
   line: string;
@@ -36,12 +34,10 @@ export interface Translations {
   text: string;
   frame: string;
   unknownType: string;
-  // Device presets
   mobile: string;
   tablet: string;
   desktopHD: string;
   desktopFHD: string;
-  // Component types
   none: string;
   button: string;
   input: string;
@@ -53,7 +49,6 @@ export interface Translations {
   label: string;
   image: string;
   container: string;
-  // Help content
   quickStart: string;
   drawingTools: string;
   componentSemanticMark: string;
@@ -104,83 +99,83 @@ export interface Translations {
 export const translations: Record<Language, Translations> = {
   "zh-CN": {
     appTitle: "UIDP Editor",
-    baseResolution: "基准分辨率:",
+    baseResolution: "基准分辨率：",
     custom: "自定义",
-    width: "宽",
-    height: "高",
+    width: "宽度",
+    height: "高度",
     exportUidp: "导出 .uidp 文件",
     copyToClipboard: "复制到剪贴板",
     help: "使用帮助",
     selectShape: "请选择一个形状",
-    selected: "选中:",
+    selected: "当前选中：",
     multipleElements: "多个元素",
-    componentType: "组件类型:",
+    componentType: "组件类型：",
     clearMark: "清除标记",
-    artboardAutoDetect: "画板自动识别",
-    editorNotInitialized: "编辑器未初始化",
+    artboardAutoDetect: "画板会自动识别",
+    editorNotInitialized: "编辑器尚未初始化",
     noElementsToExport: "没有可导出的元素",
-    savedTo: "已保存到:",
-    saveFailed: "保存失败:",
+    savedTo: "已保存到：",
+    saveFailed: "保存失败：",
     copiedToClipboard: "已复制到剪贴板",
-    copyFailed: "复制失败:",
+    copyFailed: "复制失败：",
     importUidp: "导入 .uidp 文件",
     openFile: "导入 .uidp 文件",
     fileNotFound: "文件不存在",
-    readFailed: "读取失败:",
+    readFailed: "读取失败：",
     importSuccess: "导入成功",
     invalidFileFormat: "文件格式无效",
     rectangle: "矩形",
-    ellipse: "圆形/椭圆",
+    ellipse: "椭圆",
     line: "线条",
     arrow: "箭头",
     text: "文本",
-    frame: "画板 (Frame)",
+    frame: "画板（Frame）",
     unknownType: "未知类型",
     mobile: "移动端",
     tablet: "平板",
     desktopHD: "桌面 HD",
     desktopFHD: "桌面 FHD",
     none: "无",
-    button: "button (按钮)",
-    input: "input (输入框)",
-    select: "select (下拉选择)",
-    checkbox: "checkbox (复选框)",
-    radio: "radio (单选框)",
-    textarea: "textarea (多行文本)",
-    switch: "switch (开关)",
-    label: "label (标签)",
-    image: "image (图片)",
-    container: "container (容器)",
-    quickStart: "📋 快速开始",
-    drawingTools: "🎨 绘制工具",
-    componentSemanticMark: "🏷️ 组件语义标记",
-    artboardDescription: "📐 画板（Frame）说明",
-    exportFormat: "📤 导出格式",
-    shortcuts: "⌨️ 常用快捷键",
-    bestPractices: "💡 最佳实践",
-    helpStep1: "选择设备预设：在顶部工具栏选择目标设备（移动端/平板/桌面）",
-    helpStep2: "创建画板：按 F 键或选择 Frame 工具创建画板",
-    helpStep3: "绘制界面：在画板内绘制矩形、圆形、文本等元素",
-    helpStep4: "标记组件：选中形状后在顶部工具栏选择组件类型",
-    helpStep5: "导出数据：点击「导出.uidp文件」或「复制到剪贴板」",
-    toolRect: "R - 矩形工具（用于按钮、输入框、卡片等）",
-    toolEllipse: "O - 圆形/椭圆工具（用于头像、图标等）",
-    toolLine: "L - 线条工具（用于分割线、装饰线等）",
-    toolText: "T - 文本工具（用于标签、标题等）",
-    toolFrame: "F - Frame工具（画板，用于定义屏幕边界）",
-    toolSelect: "V - 选择工具",
-    toolQuickSwitch: "1-9 - 快速切换工具",
-    selectComponentTypeHint: "选中形状后，在顶部工具栏的「组件类型」下拉框选择类型：",
-    componentTip: "💡 提示：标记组件语义可以帮助 AI 更准确地理解界面意图",
-    artboardDesc1: "画板用于定义屏幕边界，导出时会作为 #0 行输出",
-    artboardDesc2: "面积最大的 Frame 会被自动识别为画板",
-    artboardDesc3: "所有形状的坐标都是相对于画板左上角的偏移量（相对坐标）",
-    artboardDesc4: "画板层级固定为 Z:0，始终在最底层",
-    artboardDesc5: "画板会自动识别，无需标记组件类型",
-    exportDesc1: "META - 画布尺寸、设备预设和参考尺寸",
-    exportDesc2: "#0 - 画板信息（尺寸、预设类型）",
-    exportDesc3: "#N - 形状信息（类型、相对坐标、层级、文本、组件语义）",
-    exportTip: "💡 提示：AI 会使用等比缩放公式将相对坐标转换为实际像素位置",
+    button: "button（按钮）",
+    input: "input（输入框）",
+    select: "select（下拉选择）",
+    checkbox: "checkbox（复选框）",
+    radio: "radio（单选框）",
+    textarea: "textarea（多行文本）",
+    switch: "switch（开关）",
+    label: "label（标签）",
+    image: "image（图片）",
+    container: "container（容器）",
+    quickStart: "快速开始",
+    drawingTools: "绘图工具",
+    componentSemanticMark: "组件语义标记",
+    artboardDescription: "画板说明",
+    exportFormat: "导出格式",
+    shortcuts: "快捷键",
+    bestPractices: "最佳实践",
+    helpStep1: "先在顶部选择目标设备预设，或输入自定义分辨率。",
+    helpStep2: "按 F 或使用 Frame 工具创建画板。",
+    helpStep3: "在画板内绘制矩形、椭圆、文本等界面元素。",
+    helpStep4: "选中元素后，在顶部栏给它标记组件类型。",
+    helpStep5: "完成后导出 .uidp 文件，或直接复制到剪贴板。",
+    toolRect: "矩形工具，可表示按钮、输入框、卡片等",
+    toolEllipse: "椭圆工具，可表示头像、图标等",
+    toolLine: "线条工具，可表示分隔线、装饰线等",
+    toolText: "文本工具，可表示标签、标题和说明",
+    toolFrame: "画板工具，用于定义屏幕边界",
+    toolSelect: "选择工具",
+    toolQuickSwitch: "快速切换工具",
+    selectComponentTypeHint: "选中单个形状后，可以在顶部栏为它指定组件语义：",
+    componentTip: "给关键元素添加组件语义后，AI 更容易正确理解界面结构。",
+    artboardDesc1: "画板用于定义屏幕边界，导出时会固定写成 #0。",
+    artboardDesc2: "如果存在多个 Frame，会自动选择面积最大的那个作为画板。",
+    artboardDesc3: "所有元素坐标都以画板左上角为原点保存。",
+    artboardDesc4: "画板层级固定为 Z:0，始终位于底层。",
+    artboardDesc5: "画板不需要额外标记组件类型。",
+    exportDesc1: "META 行保存画布尺寸、设备预设和参考尺寸。",
+    exportDesc2: "#0 行保存画板信息。",
+    exportDesc3: "#N 行保存形状类型、位置、层级、文本和组件语义。",
+    exportTip: "导出结果会保留相对坐标，供后续按比例缩放渲染。",
     shortcutUndo: "撤销",
     shortcutRedo: "重做",
     shortcutCopy: "复制",
@@ -188,16 +183,16 @@ export const translations: Record<Language, Translations> = {
     shortcutDelete: "删除选中元素",
     shortcutPan: "平移画布",
     shortcutZoom: "缩放画布",
-    practice1: "先创建画板，再在画板内绘制元素",
-    practice2: "使用矩形表示按钮、输入框等交互组件",
-    practice3: "使用文本工具添加标签和说明",
-    practice4: "为关键组件添加语义标记，提高 AI 理解准确度",
-    practice5: "合理设置层级（Z值），确保元素遮挡关系正确",
-    practice6: "导出前检查设备预设是否匹配目标平台",
+    practice1: "先创建画板，再在画板内绘制元素。",
+    practice2: "交互控件优先用矩形表示，便于后续映射成组件。",
+    practice3: "文字内容单独使用文本工具，不要混进形状名里。",
+    practice4: "给关键组件标记语义，能显著提升下游生成质量。",
+    practice5: "留意 Z 值顺序，避免导出后遮挡关系出错。",
+    practice6: "导出前确认设备预设与目标平台一致。",
     close: "×",
     language: "语言",
   },
-  "en": {
+  en: {
     appTitle: "UIDP Editor",
     baseResolution: "Base Resolution:",
     custom: "Custom",
@@ -246,36 +241,36 @@ export const translations: Record<Language, Translations> = {
     label: "label",
     image: "image",
     container: "container",
-    quickStart: "📋 Quick Start",
-    drawingTools: "🎨 Drawing Tools",
-    componentSemanticMark: "🏷️ Component Semantic Mark",
-    artboardDescription: "📐 Artboard (Frame) Description",
-    exportFormat: "📤 Export Format",
-    shortcuts: "⌨️ Keyboard Shortcuts",
-    bestPractices: "💡 Best Practices",
-    helpStep1: "Select device preset: Choose target device (Mobile/Tablet/Desktop) in the top toolbar",
-    helpStep2: "Create artboard: Press F key or select Frame tool to create an artboard",
-    helpStep3: "Draw interface: Draw rectangles, circles, text and other elements within the artboard",
-    helpStep4: "Mark components: Select component type in the top toolbar after selecting a shape",
-    helpStep5: "Export data: Click 'Export .uidp File' or 'Copy to Clipboard'",
-    toolRect: "R - Rectangle tool (for buttons, inputs, cards, etc.)",
-    toolEllipse: "O - Ellipse tool (for avatars, icons, etc.)",
-    toolLine: "L - Line tool (for dividers, decorative lines, etc.)",
-    toolText: "T - Text tool (for labels, titles, etc.)",
-    toolFrame: "F - Frame tool (Artboard, for defining screen boundaries)",
-    toolSelect: "V - Select tool",
-    toolQuickSwitch: "1-9 - Quick tool switch",
-    selectComponentTypeHint: "After selecting a shape, choose the type from the 'Component Type' dropdown in the top toolbar:",
-    componentTip: "💡 Tip: Marking component semantics helps AI understand interface intent more accurately",
-    artboardDesc1: "Artboard defines screen boundaries and is exported as #0 row",
-    artboardDesc2: "The largest Frame area is automatically recognized as the artboard",
-    artboardDesc3: "All shape coordinates are relative offsets from the artboard top-left corner",
-    artboardDesc4: "Artboard layer is fixed at Z:0, always at the bottom",
-    artboardDesc5: "Artboard is auto-detected, no need to mark component type",
-    exportDesc1: "META - Canvas size, device preset and reference dimensions",
-    exportDesc2: "#0 - Artboard info (size, preset type)",
-    exportDesc3: "#N - Shape info (type, relative coordinates, layer, text, component semantics)",
-    exportTip: "💡 Tip: AI uses proportional scaling formula to convert relative coordinates to actual pixel positions",
+    quickStart: "Quick Start",
+    drawingTools: "Drawing Tools",
+    componentSemanticMark: "Component Semantic Mark",
+    artboardDescription: "Artboard Description",
+    exportFormat: "Export Format",
+    shortcuts: "Keyboard Shortcuts",
+    bestPractices: "Best Practices",
+    helpStep1: "Choose a target device preset or enter a custom resolution.",
+    helpStep2: "Press F or use the Frame tool to create an artboard.",
+    helpStep3: "Draw rectangles, ellipses, text, and other UI elements inside the artboard.",
+    helpStep4: "Select an element and assign a component type from the top bar.",
+    helpStep5: "Export the .uidp file or copy the result to the clipboard.",
+    toolRect: "Rectangle tool for buttons, inputs, cards, and similar blocks",
+    toolEllipse: "Ellipse tool for avatars, icons, and similar shapes",
+    toolLine: "Line tool for dividers and decorative lines",
+    toolText: "Text tool for labels, titles, and descriptions",
+    toolFrame: "Frame tool for defining the screen boundary",
+    toolSelect: "Selection tool",
+    toolQuickSwitch: "Quick tool switch",
+    selectComponentTypeHint: "After selecting a single shape, assign its semantic component type from the top bar:",
+    componentTip: "Semantic tags help downstream AI or code generators understand the UI intent.",
+    artboardDesc1: "The artboard defines the screen boundary and is always exported as #0.",
+    artboardDesc2: "If multiple Frames exist, the largest one is treated as the artboard.",
+    artboardDesc3: "All element coordinates are stored relative to the artboard origin.",
+    artboardDesc4: "The artboard layer is fixed at Z:0 and always stays at the bottom.",
+    artboardDesc5: "The artboard itself does not need a component tag.",
+    exportDesc1: "The META line stores canvas size, preset, and reference size.",
+    exportDesc2: "#0 stores the artboard definition.",
+    exportDesc3: "#N stores shape type, position, layer, text, and component semantics.",
+    exportTip: "Exported coordinates stay relative so renderers can scale them proportionally.",
     shortcutUndo: "Undo",
     shortcutRedo: "Redo",
     shortcutCopy: "Copy",
@@ -283,12 +278,12 @@ export const translations: Record<Language, Translations> = {
     shortcutDelete: "Delete selected element",
     shortcutPan: "Pan canvas",
     shortcutZoom: "Zoom canvas",
-    practice1: "Create artboard first, then draw elements inside",
-    practice2: "Use rectangles for interactive components like buttons and inputs",
-    practice3: "Use text tool to add labels and descriptions",
-    practice4: "Add semantic marks to key components to improve AI understanding",
-    practice5: "Set layers (Z values) properly to ensure correct element occlusion",
-    practice6: "Check if device preset matches target platform before exporting",
+    practice1: "Create the artboard first, then draw inside it.",
+    practice2: "Use rectangles for interactive components whenever possible.",
+    practice3: "Keep text in dedicated text elements instead of shape labels.",
+    practice4: "Tag important components to improve downstream generation accuracy.",
+    practice5: "Keep Z ordering intentional so overlap is preserved after export.",
+    practice6: "Confirm the preset matches the target platform before exporting.",
     close: "×",
     language: "Language",
   },
@@ -297,10 +292,15 @@ export const translations: Record<Language, Translations> = {
 export function getDevicePresetName(preset: string, lang: Language): string {
   const t = translations[lang];
   switch (preset) {
-    case "mobile": return t.mobile;
-    case "tablet": return t.tablet;
-    case "desktop-hd": return t.desktopHD;
-    case "desktop-fhd": return t.desktopFHD;
-    default: return preset;
+    case "mobile":
+      return t.mobile;
+    case "tablet":
+      return t.tablet;
+    case "desktop-hd":
+      return t.desktopHD;
+    case "desktop-fhd":
+      return t.desktopFHD;
+    default:
+      return preset;
   }
 }

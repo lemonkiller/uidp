@@ -9,6 +9,8 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
+            #[cfg(debug_assertions)]
+            window.open_devtools();
             let _ = window.show();
             let _ = window.set_focus();
             Ok(())
